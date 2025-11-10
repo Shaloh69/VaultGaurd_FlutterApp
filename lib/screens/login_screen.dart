@@ -42,20 +42,15 @@ class _LoginScreenState extends State<LoginScreen> {
     final apiService = Provider.of<ApiService>(context, listen: false);
 
     try {
-      // Update API service with new server URL
       await apiService.updateServerUrl(_serverUrlController.text.trim());
-      
-      // Set credentials
       await apiService.setCredentials(
         _usernameController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      // Test connection
       final health = await apiService.checkHealth();
       
       if (health['status'] == 'ok') {
-        // Login successful
         final success = await authProvider.login(
           _usernameController.text.trim(),
           _passwordController.text.trim(),
@@ -86,9 +81,17 @@ class _LoginScreenState extends State<LoginScreen> {
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.danger,
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: AppColors.danger),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: AppColors.danger.withOpacity(0.9),
         duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -102,8 +105,9 @@ class _LoginScreenState extends State<LoginScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).colorScheme.primary.withOpacity(0.8),
-              Theme.of(context).colorScheme.secondary.withOpacity(0.8),
+              AppColors.gradientStart.withOpacity(0.8),
+              AppColors.background,
+              AppColors.surface,
             ],
           ),
         ),
@@ -112,48 +116,68 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Card(
-                elevation: 8,
+                elevation: 12,
+                shadowColor: AppColors.primary.withOpacity(0.5),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 450),
+                  padding: const EdgeInsets.all(32.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Icon(
-                          Icons.electrical_services_rounded,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'VaultGaurd',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
+                        // Logo and Title
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.primary.withOpacity(0.1),
+                            border: Border.all(
+                              color: AppColors.primary.withOpacity(0.3),
+                              width: 2,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.electrical_services_rounded,
+                            size: 64,
+                            color: AppColors.primary,
                           ),
                         ),
-                        Text(
-                          'Dual Channel Power Monitor',
+                        const SizedBox(height: 24),
+                        
+                        const Text(
+                          'VaultGaurd',
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        
+                        const Text(
+                          'Single Channel Power Monitor',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.5,
                           ),
                         ),
                         const SizedBox(height: 32),
+                        
+                        // Server URL Field
                         TextFormField(
                           controller: _serverUrlController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Server URL',
-                            prefixIcon: const Icon(Icons.dns_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            prefixIcon: Icon(Icons.dns_outlined, color: AppColors.primary),
                             hintText: 'http://192.168.1.100:3000',
                           ),
                           validator: (value) {
@@ -168,14 +192,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         const SizedBox(height: 16),
+                        
+                        // Username Field
                         TextFormField(
                           controller: _usernameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Username',
-                            prefixIcon: const Icon(Icons.person_outline),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            prefixIcon: Icon(Icons.person_outline, color: AppColors.primary),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -185,26 +208,26 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         const SizedBox(height: 16),
+                        
+                        // Password Field
                         TextFormField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword 
                                     ? Icons.visibility_outlined 
                                     : Icons.visibility_off_outlined,
+                                color: AppColors.textTertiary,
                               ),
                               onPressed: () {
                                 setState(() {
                                   _obscurePassword = !_obscurePassword;
                                 });
                               },
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           validator: (value) {
@@ -215,18 +238,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         const SizedBox(height: 16),
+                        
+                        // Device ID Field
                         TextFormField(
                           controller: _deviceIdController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Device ID (Optional)',
-                            prefixIcon: const Icon(Icons.router_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            prefixIcon: Icon(Icons.router_outlined, color: AppColors.primary),
                             hintText: 'e.g., VAULTER_001',
                           ),
                         ),
                         const SizedBox(height: 8),
+                        
+                        // Remember Me Checkbox
                         Row(
                           children: [
                             Checkbox(
@@ -236,11 +260,22 @@ class _LoginScreenState extends State<LoginScreen> {
                                   _rememberMe = value ?? false;
                                 });
                               },
+                              fillColor: WidgetStateProperty.resolveWith((states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return AppColors.primary;
+                                }
+                                return AppColors.border;
+                              }),
                             ),
-                            Text('Remember me'),
+                            const Text(
+                              'Remember me',
+                              style: TextStyle(color: AppColors.textSecondary),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
+                        
+                        // Login Button
                         ElevatedButton(
                           onPressed: _isLoading ? null : _login,
                           style: ElevatedButton.styleFrom(
@@ -248,29 +283,62 @@ class _LoginScreenState extends State<LoginScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
+                            elevation: 8,
+                            shadowColor: AppColors.primary.withOpacity(0.5),
                           ),
                           child: _isLoading
                               ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
+                                  height: 24,
+                                  width: 24,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                   ),
                                 )
-                              : const Text(
-                                  'Connect',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              : const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.login, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Connect',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                         ),
                         const SizedBox(height: 16),
-                        Text(
-                          'Default credentials: admin / admin123',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                        
+                        // Default Credentials Info
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.info.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppColors.info.withOpacity(0.3),
+                            ),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.info_outline, 
+                                color: AppColors.info, 
+                                size: 20,
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Default: admin / admin123',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],

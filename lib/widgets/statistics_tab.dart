@@ -30,10 +30,20 @@ class _StatisticsTabState extends State<StatisticsTab> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
-                const Text('Loading statistics...'),
+                const SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 4,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  ),
+                ),
                 const SizedBox(height: 24),
+                const Text(
+                  'Loading statistics...',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 32),
                 ElevatedButton.icon(
                   onPressed: () => deviceProvider.loadStatistics(),
                   icon: const Icon(Icons.refresh),
@@ -46,21 +56,55 @@ class _StatisticsTabState extends State<StatisticsTab> {
 
         return RefreshIndicator(
           onRefresh: () => deviceProvider.loadStatistics(),
+          color: AppColors.primary,
+          backgroundColor: AppColors.surface,
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Summary Card
+              // Summary Card with gradient
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                elevation: 8,
+                shadowColor: AppColors.primary.withOpacity(0.3),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primary.withOpacity(0.3),
+                        AppColors.surface,
+                      ],
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Statistics Summary',
-                        style: Theme.of(context).textTheme.titleLarge,
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.analytics,
+                              color: AppColors.primary,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Statistics Summary',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      const Divider(),
+                      const Divider(height: 24, color: AppColors.divider),
                       _buildSummaryRow('Total Readings', stats.totalReadings.toString()),
                     ],
                   ),
@@ -70,63 +114,118 @@ class _StatisticsTabState extends State<StatisticsTab> {
 
               // Voltage Statistics
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                elevation: 4,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.voltageColor.withOpacity(0.1),
+                        AppColors.surface,
+                      ],
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.bolt, color: AppColors.voltageColor),
-                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.voltageColor.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.bolt,
+                              color: AppColors.voltageColor,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
                           Text(
                             'Voltage Statistics',
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: AppColors.voltageColor,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
-                      const Divider(),
-                      _buildStatRow('Minimum', formatNumber(stats.voltage.min, decimals: 1), 'V'),
-                      _buildStatRow('Maximum', formatNumber(stats.voltage.max, decimals: 1), 'V'),
-                      _buildStatRow('Average', formatNumber(stats.voltage.avg, decimals: 1), 'V'),
+                      const Divider(height: 24, color: AppColors.divider),
+                      _buildStatRow('Minimum', formatNumber(stats.voltage.min, decimals: 1), 'V', AppColors.voltageColor),
+                      const SizedBox(height: 12),
+                      _buildStatRow('Maximum', formatNumber(stats.voltage.max, decimals: 1), 'V', AppColors.voltageColor),
+                      const SizedBox(height: 12),
+                      _buildStatRow('Average', formatNumber(stats.voltage.avg, decimals: 1), 'V', AppColors.voltageColor),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Channel 1 Statistics
+              // Power Statistics
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                elevation: 4,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.powerColor.withOpacity(0.1),
+                        AppColors.surface,
+                      ],
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.analytics, color: AppColors.channel1),
-                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.powerColor.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.power,
+                              color: AppColors.powerColor,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
                           Text(
-                            'Channel 1 Statistics',
-                            style: Theme.of(context).textTheme.titleLarge,
+                            'Power Statistics',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: AppColors.powerColor,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
-                      const Divider(),
+                      const Divider(height: 24, color: AppColors.divider),
                       _buildStatRow(
                         'Avg Current',
-                        formatNumber(stats.channel1.avgCurrent, decimals: 3),
+                        formatNumber(stats.channel.avgCurrent, decimals: 3),
                         'A',
+                        AppColors.currentColor,
                       ),
+                      const SizedBox(height: 12),
                       _buildStatRow(
                         'Avg Power',
-                        formatNumber(stats.channel1.avgPower, decimals: 1),
+                        formatNumber(stats.channel.avgPower, decimals: 1),
                         'W',
+                        AppColors.powerColor,
                       ),
+                      const SizedBox(height: 12),
                       _buildStatRow(
                         'Total Energy',
-                        formatNumber(stats.channel1.totalEnergy, decimals: 3),
+                        formatNumber(stats.channel.totalEnergy, decimals: 3),
                         'kWh',
+                        AppColors.energyColor,
                       ),
                     ],
                   ),
@@ -134,39 +233,69 @@ class _StatisticsTabState extends State<StatisticsTab> {
               ),
               const SizedBox(height: 16),
 
-              // Channel 2 Statistics
+              // Information Card
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                elevation: 4,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.info.withOpacity(0.15),
+                        AppColors.surface,
+                      ],
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.analytics, color: AppColors.channel2),
-                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.info.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.info_outline,
+                              color: AppColors.info,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
                           Text(
-                            'Channel 2 Statistics',
-                            style: Theme.of(context).textTheme.titleLarge,
+                            'About VaultGaurd',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: AppColors.info,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
-                      const Divider(),
-                      _buildStatRow(
-                        'Avg Current',
-                        formatNumber(stats.channel2.avgCurrent, decimals: 3),
-                        'A',
+                      const Divider(height: 24, color: AppColors.divider),
+                      Text(
+                        'VaultGaurd is a single-channel power monitoring device with solid-state relay (SSR) control. '
+                        'It monitors voltage, current, power, and energy consumption in real-time.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                      _buildStatRow(
-                        'Avg Power',
-                        formatNumber(stats.channel2.avgPower, decimals: 1),
-                        'W',
+                      const SizedBox(height: 16),
+                      Text(
+                        'Features:',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                      _buildStatRow(
-                        'Total Energy',
-                        formatNumber(stats.channel2.totalEnergy, decimals: 3),
-                        'kWh',
-                      ),
+                      const SizedBox(height: 8),
+                      _buildFeatureItem('Real-time power monitoring'),
+                      _buildFeatureItem('Single SSR control'),
+                      _buildFeatureItem('Energy cost calculation'),
+                      _buildFeatureItem('Remote control via app'),
+                      _buildFeatureItem('WebSocket live updates'),
                     ],
                   ),
                 ),
@@ -179,37 +308,104 @@ class _StatisticsTabState extends State<StatisticsTab> {
   }
 
   Widget _buildSummaryRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.cardElevated.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+            ),
+          ),
           Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: AppColors.primary,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatRow(String label, String value, String unit) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+  Widget _buildStatRow(String label, String value, String unit, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Colors.grey[600])),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+            ),
+          ),
           Row(
             children: [
               Text(
                 value,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  color: color,
+                ),
               ),
-              const SizedBox(width: 4),
-              Text(unit, style: TextStyle(color: Colors.grey[600])),
+              const SizedBox(width: 6),
+              Text(
+                unit,
+                style: const TextStyle(
+                  color: AppColors.textTertiary,
+                  fontSize: 14,
+                ),
+              ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(String feature) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: AppColors.success.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check_circle,
+              color: AppColors.success,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              feature,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
           ),
         ],
       ),

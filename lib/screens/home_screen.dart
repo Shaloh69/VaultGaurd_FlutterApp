@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/device_provider.dart';
-import '../services/websocket_service.dart';
 import '../utils/constants.dart';
 import '../widgets/dashboard_tab.dart';
 import '../widgets/controls_tab.dart';
@@ -40,19 +39,15 @@ class _HomeScreenState extends State<HomeScreen>
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final deviceProvider = Provider.of<DeviceProvider>(context, listen: false);
 
-    // Connect WebSocket
     if (authProvider.serverUrl != null) {
       deviceProvider.connectWebSocket(authProvider.serverUrl!);
     }
 
-    // Load devices
     await deviceProvider.loadDevices();
 
-    // Auto-select device if deviceId is set
     if (authProvider.deviceId != null) {
       await deviceProvider.selectDevice(authProvider.deviceId!);
     } else if (deviceProvider.allDevices.isNotEmpty) {
-      // Select first device
       await deviceProvider.selectDevice(deviceProvider.allDevices.first.deviceId);
       await authProvider.setDeviceId(deviceProvider.allDevices.first.deviceId);
     }
@@ -70,8 +65,11 @@ class _HomeScreenState extends State<HomeScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: const Text('Logout', style: TextStyle(color: AppColors.textPrimary)),
+        content: const Text(
+          'Are you sure you want to logout?',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -106,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => const DeviceSelector(),
     );
   }
@@ -121,45 +120,94 @@ class _HomeScreenState extends State<HomeScreen>
           appBar: AppBar(
             title: Column(
               children: [
-                const Text('VaultGaurd'),
+                const Text(
+                  'VaultGaurd',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
                 if (selectedDevice != null)
                   Text(
                     selectedDevice.deviceId,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.secondary,
+                    ),
                   ),
               ],
             ),
-            actions: [
-              // Connection status
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: isConnected ? AppColors.success : AppColors.danger,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      isConnected ? 'Online' : 'Offline',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.surface,
+                    AppColors.cardElevated,
                   ],
                 ),
               ),
-              // Device selector
+            ),
+            actions: [
+              // Connection Status
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isConnected 
+                        ? AppColors.success.withOpacity(0.2)
+                        : AppColors.danger.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isConnected ? AppColors.success : AppColors.danger,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: isConnected ? AppColors.success : AppColors.danger,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: isConnected ? AppColors.success : AppColors.danger,
+                              blurRadius: 4,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isConnected ? 'Online' : 'Offline',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isConnected ? AppColors.success : AppColors.danger,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              // Device Selector
               if (deviceProvider.allDevices.length > 1)
                 IconButton(
                   icon: const Icon(Icons.devices_outlined),
                   onPressed: _showDeviceSelector,
                   tooltip: 'Select Device',
                 ),
+              
               // Menu
               PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                color: AppColors.cardElevated,
                 onSelected: (value) {
                   switch (value) {
                     case 'refresh':
@@ -180,9 +228,9 @@ class _HomeScreenState extends State<HomeScreen>
                     value: 'refresh',
                     child: Row(
                       children: [
-                        Icon(Icons.refresh),
-                        SizedBox(width: 8),
-                        Text('Refresh'),
+                        Icon(Icons.refresh, color: AppColors.primary),
+                        SizedBox(width: 12),
+                        Text('Refresh', style: TextStyle(color: AppColors.textPrimary)),
                       ],
                     ),
                   ),
@@ -190,9 +238,9 @@ class _HomeScreenState extends State<HomeScreen>
                     value: 'reconnect',
                     child: Row(
                       children: [
-                        Icon(Icons.sync),
-                        SizedBox(width: 8),
-                        Text('Reconnect'),
+                        Icon(Icons.sync, color: AppColors.info),
+                        SizedBox(width: 12),
+                        Text('Reconnect', style: TextStyle(color: AppColors.textPrimary)),
                       ],
                     ),
                   ),
@@ -201,9 +249,9 @@ class _HomeScreenState extends State<HomeScreen>
                     value: 'logout',
                     child: Row(
                       children: [
-                        Icon(Icons.logout, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Logout', style: TextStyle(color: Colors.red)),
+                        Icon(Icons.logout, color: AppColors.danger),
+                        SizedBox(width: 12),
+                        Text('Logout', style: TextStyle(color: AppColors.danger)),
                       ],
                     ),
                   ),
@@ -212,10 +260,20 @@ class _HomeScreenState extends State<HomeScreen>
             ],
             bottom: TabBar(
               controller: _tabController,
+              indicatorWeight: 3,
               tabs: const [
-                Tab(icon: Icon(Icons.dashboard_outlined), text: 'Dashboard'),
-                Tab(icon: Icon(Icons.settings_remote_outlined), text: 'Controls'),
-                Tab(icon: Icon(Icons.analytics_outlined), text: 'Stats'),
+                Tab(
+                  icon: Icon(Icons.dashboard_outlined),
+                  text: 'Dashboard',
+                ),
+                Tab(
+                  icon: Icon(Icons.settings_remote_outlined),
+                  text: 'Controls',
+                ),
+                Tab(
+                  icon: Icon(Icons.analytics_outlined),
+                  text: 'Stats',
+                ),
               ],
             ),
           ),
@@ -224,37 +282,56 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.electrical_services_outlined,
-                        size: 64,
-                        color: Colors.grey[400],
+                      Container(
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.surface,
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.electrical_services_outlined,
+                          size: 64,
+                          color: AppColors.primary,
+                        ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       Text(
                         'No Device Selected',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Please select a device to monitor',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[500],
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                       if (deviceProvider.allDevices.isNotEmpty)
                         ElevatedButton.icon(
                           onPressed: _showDeviceSelector,
                           icon: const Icon(Icons.devices_outlined),
                           label: const Text('Select Device'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                          ),
                         )
                       else
                         ElevatedButton.icon(
                           onPressed: () => deviceProvider.loadDevices(),
                           icon: const Icon(Icons.refresh),
                           label: const Text('Refresh Devices'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                          ),
                         ),
                     ],
                   ),

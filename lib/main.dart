@@ -59,41 +59,172 @@ class VaultGaurdApp extends StatelessWidget {
       child: MaterialApp(
         title: 'VaultGaurd',
         debugShowCheckedModeBanner: false,
+        
+        // Dark Purple Theme
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.primary,
-            brightness: Brightness.light,
+          brightness: Brightness.dark,
+          
+          // Color Scheme
+          colorScheme: const ColorScheme.dark(
+            primary: AppColors.primary,
+            secondary: AppColors.secondary,
+            surface: AppColors.surface,
+            error: AppColors.danger,
+            onPrimary: Colors.white,
+            onSecondary: Colors.white,
+            onSurface: AppColors.textPrimary,
+            onError: Colors.white,
           ),
+          
+          // Scaffold Background
+          scaffoldBackgroundColor: AppColors.background,
+          
+          // App Bar Theme
           appBarTheme: const AppBarTheme(
             centerTitle: true,
-            elevation: 2,
+            elevation: 0,
+            backgroundColor: AppColors.surface,
+            foregroundColor: AppColors.textPrimary,
+            iconTheme: IconThemeData(color: AppColors.textPrimary),
           ),
+          
+          // Card Theme
           cardTheme: CardTheme(
-            elevation: 2,
+            elevation: 4,
+            color: AppColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            shadowColor: AppColors.primary.withOpacity(0.3),
+          ),
+          
+          // Elevated Button Theme
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              shadowColor: AppColors.primary.withOpacity(0.5),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+          
+          // Text Button Theme
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.secondary,
+            ),
+          ),
+          
+          // Input Decoration Theme
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: AppColors.cardElevated,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.danger),
+            ),
+            labelStyle: const TextStyle(color: AppColors.textSecondary),
+            hintStyle: const TextStyle(color: AppColors.textTertiary),
+          ),
+          
+          // Icon Theme
+          iconTheme: const IconThemeData(
+            color: AppColors.textPrimary,
+          ),
+          
+          // Divider Theme
+          dividerTheme: const DividerThemeData(
+            color: AppColors.divider,
+            thickness: 1,
+          ),
+          
+          // Chip Theme
+          chipTheme: ChipThemeData(
+            backgroundColor: AppColors.cardElevated,
+            deleteIconColor: AppColors.textSecondary,
+            labelStyle: const TextStyle(color: AppColors.textPrimary),
+            side: const BorderSide(color: AppColors.border),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          
+          // Dialog Theme
+          dialogTheme: DialogTheme(
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          
+          // Bottom Sheet Theme
+          bottomSheetTheme: const BottomSheetThemeData(
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+          ),
+          
+          // Snackbar Theme
+          snackBarTheme: SnackBarThemeData(
+            backgroundColor: AppColors.cardElevated,
+            contentTextStyle: const TextStyle(color: AppColors.textPrimary),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            behavior: SnackBarBehavior.floating,
+          ),
+          
+          // Tab Bar Theme
+          tabBarTheme: const TabBarTheme(
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textTertiary,
+            indicatorColor: AppColors.primary,
+            indicatorSize: TabBarIndicatorSize.label,
+          ),
+          
+          // Progress Indicator Theme
+          progressIndicatorTheme: const ProgressIndicatorThemeData(
+            color: AppColors.primary,
+          ),
+          
+          // Text Theme
+          textTheme: const TextTheme(
+            displayLarge: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+            displayMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+            displaySmall: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+            headlineLarge: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+            headlineMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+            headlineSmall: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+            titleLarge: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+            titleMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w500),
+            titleSmall: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w500),
+            bodyLarge: TextStyle(color: AppColors.textPrimary),
+            bodyMedium: TextStyle(color: AppColors.textSecondary),
+            bodySmall: TextStyle(color: AppColors.textTertiary),
+            labelLarge: TextStyle(color: AppColors.textPrimary),
+            labelMedium: TextStyle(color: AppColors.textSecondary),
+            labelSmall: TextStyle(color: AppColors.textTertiary),
           ),
         ),
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.primary,
-            brightness: Brightness.dark,
-          ),
-          appBarTheme: const AppBarTheme(
-            centerTitle: true,
-            elevation: 2,
-          ),
-          cardTheme: CardTheme(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        ),
-        themeMode: ThemeMode.system,
+        
         home: const SplashScreen(),
         routes: {
           '/login': (context) => const LoginScreen(),

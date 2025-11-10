@@ -144,8 +144,9 @@ class ApiService extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data['cirquitiq'] != null) {
-          return Statistics.fromJson(data['cirquitiq']);
+        // For VAULTER, look for 'vaulter' key (not 'cirquitiq')
+        if (data['vaulter'] != null) {
+          return Statistics.fromJson(data['vaulter']);
         }
         return null;
       } else {
@@ -177,14 +178,14 @@ class ApiService extends ChangeNotifier {
     }
   }
 
-  // Control relay
-  Future<bool> controlRelay(String deviceId, bool turnOn, {int? channel}) async {
+  // Control SSR (VaultGaurd single SSR - no channel parameter)
+  Future<bool> controlSSR(String deviceId, bool turnOn) async {
     try {
       String url = '$_serverUrl${AppConstants.apiRelay}/$deviceId/${turnOn ? 'on' : 'off'}';
       
-      if (channel != null) {
-        url += '?channel=$channel';
-      }
+      // IMPORTANT: VaultGaurd (VAULTER) has no channel parameter
+      // The server expects: /api/admin/relay/:deviceId/on or /off
+      // CircuitIQ would use: /api/admin/relay/:deviceId/on?channel=1
 
       final response = await http.post(
         Uri.parse(url),
@@ -193,7 +194,7 @@ class ApiService extends ChangeNotifier {
 
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('Error controlling relay: $e');
+      debugPrint('Error controlling SSR: $e');
       return false;
     }
   }

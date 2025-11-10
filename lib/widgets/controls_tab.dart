@@ -20,43 +20,34 @@ class _ControlsTabState extends State<ControlsTab> {
     super.dispose();
   }
 
-  Future<void> _controlRelay(DeviceProvider provider, int channel, bool turnOn) async {
+  Future<void> _controlSSR(DeviceProvider provider, bool turnOn) async {
     setState(() => _isProcessing = true);
     
-    final success = await provider.controlRelay(channel, turnOn);
+    final success = await provider.controlSSR(turnOn);
     
     setState(() => _isProcessing = false);
     
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            success 
-                ? 'Channel $channel turned ${turnOn ? "ON" : "OFF"}' 
-                : 'Failed to control relay',
+          content: Row(
+            children: [
+              Icon(
+                success ? Icons.check_circle : Icons.error,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  success 
+                      ? 'SSR turned ${turnOn ? "ON" : "OFF"}' 
+                      : 'Failed to control SSR',
+                ),
+              ),
+            ],
           ),
           backgroundColor: success ? AppColors.success : AppColors.danger,
-        ),
-      );
-    }
-  }
-
-  Future<void> _controlAllRelays(DeviceProvider provider, bool turnOn) async {
-    setState(() => _isProcessing = true);
-    
-    final success = await provider.controlAllRelays(turnOn);
-    
-    setState(() => _isProcessing = false);
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success 
-                ? 'All relays turned ${turnOn ? "ON" : "OFF"}' 
-                : 'Failed to control relays',
-          ),
-          backgroundColor: success ? AppColors.success : AppColors.danger,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -74,12 +65,24 @@ class _ControlsTabState extends State<ControlsTab> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            success 
-                ? 'Command sent: $command' 
-                : 'Failed to send command',
+          content: Row(
+            children: [
+              Icon(
+                success ? Icons.check_circle : Icons.error,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  success 
+                      ? 'Command sent: $command' 
+                      : 'Failed to send command',
+                ),
+              ),
+            ],
           ),
           backgroundColor: success ? AppColors.success : AppColors.danger,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -125,12 +128,24 @@ class _ControlsTabState extends State<ControlsTab> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            success 
-                ? 'System ${action}ed successfully' 
-                : 'Failed to $action system',
+          content: Row(
+            children: [
+              Icon(
+                success ? Icons.check_circle : Icons.error,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  success 
+                      ? 'System ${action}ed successfully' 
+                      : 'Failed to $action system',
+                ),
+              ),
+            ],
           ),
           backgroundColor: success ? AppColors.success : AppColors.danger,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -145,31 +160,65 @@ class _ControlsTabState extends State<ControlsTab> {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Quick Controls
+            // SSR Control with gradient
             Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
+              elevation: 8,
+              shadowColor: AppColors.primary.withOpacity(0.3),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.surface,
+                      AppColors.cardElevated,
+                    ],
+                  ),
+                ),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Quick Controls',
-                      style: Theme.of(context).textTheme.titleLarge,
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.power_settings_new,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'SSR Control',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-                    const Divider(),
+                    const Divider(height: 24, color: AppColors.divider),
                     Row(
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: _isProcessing 
                                 ? null 
-                                : () => _controlAllRelays(deviceProvider, true),
+                                : () => _controlSSR(deviceProvider, true),
                             icon: const Icon(Icons.power_settings_new),
-                            label: const Text('All ON'),
+                            label: const Text('Turn ON'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.success,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(18),
+                              elevation: 6,
+                              shadowColor: AppColors.success.withOpacity(0.5),
                             ),
                           ),
                         ),
@@ -178,65 +227,97 @@ class _ControlsTabState extends State<ControlsTab> {
                           child: ElevatedButton.icon(
                             onPressed: _isProcessing 
                                 ? null 
-                                : () => _controlAllRelays(deviceProvider, false),
+                                : () => _controlSSR(deviceProvider, false),
                             icon: const Icon(Icons.power_off),
-                            label: const Text('All OFF'),
+                            label: const Text('Turn OFF'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.danger,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(18),
+                              elevation: 6,
+                              shadowColor: AppColors.danger.withOpacity(0.5),
                             ),
                           ),
                         ),
                       ],
                     ),
+                    ...[
+                    const SizedBox(height: 16),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: getSSRStatusColor(data.ssrState).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: getSSRStatusColor(data.ssrState),
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: getSSRStatusColor(data.ssrState).withOpacity(0.3),
+                              blurRadius: 12,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              data.ssrState ? Icons.power_settings_new : Icons.power_off,
+                              color: getSSRStatusColor(data.ssrState),
+                              size: 24,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'SSR is ${getSSRStatusText(data.ssrState)}',
+                              style: TextStyle(
+                                color: getSSRStatusColor(data.ssrState),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
 
-            // Channel 1 Control
-            _buildChannelControl(
-              context,
-              deviceProvider,
-              1,
-              data?.channel1.relayState ?? false,
-              AppColors.channel1,
-            ),
-            const SizedBox(height: 16),
-
-            // Channel 2 Control
-            _buildChannelControl(
-              context,
-              deviceProvider,
-              2,
-              data?.channel2.relayState ?? false,
-              AppColors.channel2,
-            ),
-            const SizedBox(height: 16),
-
             // Custom Command
             Card(
+              elevation: 4,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Custom Command',
-                      style: Theme.of(context).textTheme.titleLarge,
+                    Row(
+                      children: [
+                        const Icon(Icons.terminal, color: AppColors.info),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Custom Command',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ],
                     ),
-                    const Divider(),
+                    const Divider(height: 24, color: AppColors.divider),
                     TextField(
                       controller: _commandController,
                       decoration: InputDecoration(
                         hintText: 'Enter command (e.g., status, test, calibrate)',
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
                         ),
                         suffixIcon: IconButton(
-                          icon: const Icon(Icons.send),
+                          icon: const Icon(Icons.send, color: AppColors.primary),
                           onPressed: _isProcessing
                               ? null
                               : () => _sendCommand(
@@ -258,28 +339,37 @@ class _ControlsTabState extends State<ControlsTab> {
 
             // Common Commands
             Card(
+              elevation: 4,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Common Commands',
-                      style: Theme.of(context).textTheme.titleLarge,
+                    Row(
+                      children: [
+                        const Icon(Icons.apps, color: AppColors.secondary),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Common Commands',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ],
                     ),
-                    const Divider(),
+                    const Divider(height: 24, color: AppColors.divider),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        _buildCommandChip('status', Icons.info_outline),
-                        _buildCommandChip('test', Icons.science_outlined),
-                        _buildCommandChip('calibrate', Icons.tune),
-                        _buildCommandChip('stats', Icons.analytics_outlined),
-                        _buildCommandChip('manual', Icons.pan_tool_outlined),
-                        _buildCommandChip('safety', Icons.shield_outlined),
-                        _buildCommandChip('buzzer', Icons.volume_up_outlined),
-                        _buildCommandChip('clear', Icons.clear_all),
+                        _buildCommandChip('status', Icons.info_outline, AppColors.info),
+                        _buildCommandChip('test', Icons.science_outlined, AppColors.warning),
+                        _buildCommandChip('calibrate', Icons.tune, AppColors.primary),
+                        _buildCommandChip('stats', Icons.analytics_outlined, AppColors.secondary),
+                        _buildCommandChip('manual', Icons.pan_tool_outlined, AppColors.energyColor),
+                        _buildCommandChip('safety', Icons.shield_outlined, AppColors.success),
+                        _buildCommandChip('buzzer', Icons.volume_up_outlined, AppColors.warning),
+                        _buildCommandChip('clear', Icons.clear_all, AppColors.danger),
+                        _buildCommandChip('enable', Icons.toggle_on, AppColors.success),
+                        _buildCommandChip('disable', Icons.toggle_off, AppColors.disabled),
                       ],
                     ),
                   ],
@@ -290,18 +380,33 @@ class _ControlsTabState extends State<ControlsTab> {
 
             // System Controls
             Card(
+              elevation: 4,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'System Controls',
-                      style: Theme.of(context).textTheme.titleLarge,
+                    Row(
+                      children: [
+                        const Icon(Icons.settings, color: AppColors.warning),
+                        const SizedBox(width: 12),
+                        Text(
+                          'System Controls',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ],
                     ),
-                    const Divider(),
+                    const Divider(height: 24, color: AppColors.divider),
                     ListTile(
-                      leading: Icon(Icons.restart_alt, color: AppColors.warning),
+                      contentPadding: EdgeInsets.zero,
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.restart_alt, color: AppColors.warning),
+                      ),
                       title: const Text('Restart Device'),
                       subtitle: const Text('Restart the ESP32 microcontroller'),
                       trailing: ElevatedButton(
@@ -314,9 +419,17 @@ class _ControlsTabState extends State<ControlsTab> {
                         child: const Text('Restart'),
                       ),
                     ),
-                    const Divider(),
+                    const Divider(color: AppColors.divider),
                     ListTile(
-                      leading: Icon(Icons.settings_backup_restore, color: AppColors.danger),
+                      contentPadding: EdgeInsets.zero,
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.danger.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.settings_backup_restore, color: AppColors.danger),
+                      ),
                       title: const Text('Reset System'),
                       subtitle: const Text('Emergency system reset'),
                       trailing: ElevatedButton(
@@ -339,95 +452,40 @@ class _ControlsTabState extends State<ControlsTab> {
     );
   }
 
-  Widget _buildChannelControl(
-    BuildContext context,
-    DeviceProvider provider,
-    int channel,
-    bool relayState,
-    Color color,
-  ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Channel $channel',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: color,
-                  ),
+  Widget _buildCommandChip(String command, IconData icon, Color color) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _isProcessing
+            ? null
+            : () {
+                final provider = Provider.of<DeviceProvider>(context, listen: false);
+                _sendCommand(provider, command);
+              },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(0.5)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 8),
+              Text(
+                command,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: getRelayStatusColor(relayState).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: getRelayStatusColor(relayState)),
-                  ),
-                  child: Text(
-                    getRelayStatusText(relayState),
-                    style: TextStyle(
-                      color: getRelayStatusColor(relayState),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const Divider(),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isProcessing
-                        ? null
-                        : () => _controlRelay(provider, channel, true),
-                    icon: const Icon(Icons.power_settings_new),
-                    label: const Text('Turn ON'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.all(16),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isProcessing
-                        ? null
-                        : () => _controlRelay(provider, channel, false),
-                    icon: const Icon(Icons.power_off),
-                    label: const Text('Turn OFF'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.danger,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.all(16),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildCommandChip(String command, IconData icon) {
-    return ActionChip(
-      label: Text(command),
-      avatar: Icon(icon, size: 16),
-      onPressed: _isProcessing
-          ? null
-          : () {
-              final provider = Provider.of<DeviceProvider>(context, listen: false);
-              _sendCommand(provider, command);
-            },
     );
   }
 }

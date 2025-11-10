@@ -4,7 +4,6 @@ import 'package:fl_chart/fl_chart.dart';
 import '../providers/device_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/metric_card.dart';
-import '../widgets/channel_card.dart';
 
 class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
@@ -19,106 +18,180 @@ class _DashboardTabState extends State<DashboardTab> {
     return Consumer<DeviceProvider>(
       builder: (context, deviceProvider, child) {
         final data = deviceProvider.currentData;
-        
-        if (data == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
-                Text(
-                  'Waiting for data...',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            ),
-          );
-        }
 
         return RefreshIndicator(
           onRefresh: deviceProvider.refreshDevice,
+          color: AppColors.primary,
+          backgroundColor: AppColors.surface,
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Voltage Card
-              MetricCard(
-                title: 'System Voltage',
-                value: formatNumber(data.voltage, decimals: 1),
-                unit: AppStrings.unitVoltage,
-                icon: Icons.bolt,
-                color: AppColors.voltageColor,
+              // Voltage Card with gradient
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.voltageColor.withOpacity(0.2),
+                      AppColors.surface,
+                    ],
+                  ),
+                ),
+                child: MetricCard(
+                  title: 'System Voltage',
+                  value: formatNumber(data.voltage, decimals: 1),
+                  unit: AppStrings.unitVoltage,
+                  icon: Icons.bolt,
+                  color: AppColors.voltageColor,
+                ),
               ),
               const SizedBox(height: 16),
               
-              // Channel 1
-              ChannelCard(
-                channelNumber: 1,
-                channelData: data.channel1,
-                color: AppColors.channel1,
-              ),
-              const SizedBox(height: 16),
-              
-              // Channel 2
-              ChannelCard(
-                channelNumber: 2,
-                channelData: data.channel2,
-                color: AppColors.channel2,
-              ),
-              const SizedBox(height: 16),
-              
-              // Total Power & Energy
+              // Single Channel Power Metrics
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                elevation: 8,
+                shadowColor: AppColors.primary.withOpacity(0.3),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.surface,
+                        AppColors.cardElevated,
+                      ],
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(
-                            Icons.power,
-                            color: AppColors.powerColor,
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: AppColors.primary.withOpacity(0.5),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.electrical_services,
+                                  color: AppColors.primary,
+                                  size: 28,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Text(
+                                'Power Monitor',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Total System',
-                            style: Theme.of(context).textTheme.titleLarge,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: getSSRStatusColor(data.ssrState).withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: getSSRStatusColor(data.ssrState),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: getSSRStatusColor(data.ssrState).withOpacity(0.3),
+                                  blurRadius: 8,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  data.ssrState ? Icons.power_settings_new : Icons.power_off,
+                                  color: getSSRStatusColor(data.ssrState),
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  getSSRStatusText(data.ssrState),
+                                  style: TextStyle(
+                                    color: getSSRStatusColor(data.ssrState),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                      const Divider(),
+                      const Divider(height: 32, color: AppColors.divider),
                       Row(
                         children: [
                           Expanded(
-                            child: _buildMetricItem(
+                            child: _buildMetric(
                               context,
-                              'Total Power',
-                              formatNumber(data.totalPower, decimals: 1),
+                              'Current',
+                              formatNumber(data.current, decimals: 3),
+                              AppStrings.unitCurrent,
+                              AppColors.currentColor,
+                            ),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 60,
+                            color: AppColors.divider,
+                          ),
+                          Expanded(
+                            child: _buildMetric(
+                              context,
+                              'Power',
+                              formatNumber(data.power, decimals: 1),
                               AppStrings.unitPower,
                               AppColors.powerColor,
                             ),
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
                           Expanded(
-                            child: _buildMetricItem(
+                            child: _buildMetric(
                               context,
-                              'Total Energy',
-                              formatNumber(data.totalEnergy, decimals: 3),
+                              'Energy',
+                              formatNumber(data.energy, decimals: 3),
                               AppStrings.unitEnergy,
                               AppColors.energyColor,
                             ),
                           ),
+                          Container(
+                            width: 1,
+                            height: 60,
+                            color: AppColors.divider,
+                          ),
+                          Expanded(
+                            child: _buildMetric(
+                              context,
+                              'Cost',
+                              formatNumber(data.cost, decimals: 2),
+                              AppStrings.unitCost,
+                              AppColors.costColor,
+                            ),
+                          ),
                         ],
-                      ),
-                      const SizedBox(height: 8),
-                      Center(
-                        child: _buildMetricItem(
-                          context,
-                          'Total Cost',
-                          formatNumber(data.totalCost, decimals: 2),
-                          AppStrings.unitCost,
-                          AppColors.info,
-                        ),
                       ),
                     ],
                   ),
@@ -128,21 +201,33 @@ class _DashboardTabState extends State<DashboardTab> {
               
               // System Status
               Card(
+                elevation: 4,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'System Status',
-                        style: Theme.of(context).textTheme.titleLarge,
+                      Row(
+                        children: [
+                          const Icon(Icons.info_outline, color: AppColors.info),
+                          const SizedBox(width: 12),
+                          Text(
+                            'System Status',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ],
                       ),
-                      const Divider(),
+                      const Divider(height: 24, color: AppColors.divider),
                       _buildStatusRow('State', data.state, AppColors.info),
+                      const SizedBox(height: 8),
                       _buildStatusRow('Sensors', data.sensors, 
                           data.sensors == 'valid' ? AppColors.success : AppColors.warning),
+                      const SizedBox(height: 8),
+                      _buildStatusRow('SSR', getSSRStatusText(data.ssrState),
+                          getSSRStatusColor(data.ssrState)),
+                      const SizedBox(height: 8),
                       _buildStatusRow('Last Update', formatDateTime(data.timestamp), 
-                          AppColors.info),
+                          AppColors.secondary),
                     ],
                   ),
                 ),
@@ -158,44 +243,49 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildMetricItem(
+  Widget _buildMetric(
     BuildContext context,
     String label,
     String value,
     String unit,
     Color color,
   ) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey[600],
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textTertiary,
+              fontSize: 12,
+              letterSpacing: 0.5,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              unit,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
+              const SizedBox(width: 6),
+              Text(
+                unit,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -207,14 +297,17 @@ class _DashboardTabState extends State<DashboardTab> {
         children: [
           Text(
             label,
-            style: TextStyle(color: Colors.grey[600]),
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+            ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color),
+              border: Border.all(color: color.withOpacity(0.5)),
             ),
             child: Text(
               value.toUpperCase(),
@@ -222,6 +315,7 @@ class _DashboardTabState extends State<DashboardTab> {
                 color: color,
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
+                letterSpacing: 0.5,
               ),
             ),
           ),
@@ -232,44 +326,44 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Widget _buildChartsSection(DeviceProvider deviceProvider) {
     return Card(
+      elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Real-time Charts',
-              style: Theme.of(context).textTheme.titleLarge,
+            Row(
+              children: [
+                const Icon(Icons.show_chart, color: AppColors.primary),
+                const SizedBox(width: 12),
+                Text(
+                  'Real-time Charts',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             
-            // Voltage Chart
             _buildChart(
               'Voltage',
               deviceProvider.voltageData,
               AppColors.voltageColor,
               'V',
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             
-            // Current Chart (Both Channels)
-            _buildDualChart(
+            _buildChart(
               'Current',
-              deviceProvider.ch1CurrentData,
-              deviceProvider.ch2CurrentData,
-              AppColors.channel1,
-              AppColors.channel2,
+              deviceProvider.currentData,
+              AppColors.currentColor,
               'A',
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             
-            // Power Chart (Both Channels)
-            _buildDualChart(
+            _buildChart(
               'Power',
-              deviceProvider.ch1PowerData,
-              deviceProvider.ch2PowerData,
-              AppColors.channel1,
-              AppColors.channel2,
+              deviceProvider.powerData,
+              AppColors.powerColor,
               'W',
             ),
           ],
@@ -285,12 +379,24 @@ class _DashboardTabState extends State<DashboardTab> {
     String unit,
   ) {
     if (data.isEmpty) {
-      return SizedBox(
+      return Container(
         height: 150,
+        decoration: BoxDecoration(
+          color: AppColors.cardElevated.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
+        ),
         child: Center(
-          child: Text(
-            'Collecting data...',
-            style: TextStyle(color: Colors.grey[500]),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.timeline, color: color.withOpacity(0.5), size: 32),
+              const SizedBox(height: 8),
+              const Text(
+                'Collecting data...',
+                style: TextStyle(color: AppColors.textTertiary),
+              ),
+            ],
           ),
         ),
       );
@@ -301,32 +407,63 @@ class _DashboardTabState extends State<DashboardTab> {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 150,
+        const SizedBox(height: 12),
+        Container(
+          height: 160,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.cardElevated.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(0.3)),
+          ),
           child: LineChart(
             LineChartData(
-              gridData: FlGridData(show: true),
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: 1,
+                getDrawingHorizontalLine: (value) {
+                  return FlLine(
+                    color: AppColors.border.withOpacity(0.3),
+                    strokeWidth: 1,
+                  );
+                },
+              ),
               titlesData: FlTitlesData(
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
                     reservedSize: 40,
+                    getTitlesWidget: (value, meta) {
+                      return Text(
+                        value.toStringAsFixed(0),
+                        style: const TextStyle(
+                          color: AppColors.textTertiary,
+                          fontSize: 10,
+                        ),
+                      );
+                    },
                   ),
                 ),
-                bottomTitles: AxisTitles(
+                bottomTitles: const AxisTitles(
                   sideTitles: SideTitles(showTitles: false),
                 ),
-                rightTitles: AxisTitles(
+                rightTitles: const AxisTitles(
                   sideTitles: SideTitles(showTitles: false),
                 ),
-                topTitles: AxisTitles(
+                topTitles: const AxisTitles(
                   sideTitles: SideTitles(showTitles: false),
                 ),
               ),
-              borderData: FlBorderData(show: true),
+              borderData: FlBorderData(
+                show: true,
+                border: Border.all(color: color.withOpacity(0.3)),
+              ),
               lineBarsData: [
                 LineChartBarData(
                   spots: data
@@ -339,134 +476,16 @@ class _DashboardTabState extends State<DashboardTab> {
                       .toList(),
                   isCurved: true,
                   color: color,
-                  barWidth: 2,
-                  dotData: FlDotData(show: false),
+                  barWidth: 3,
+                  dotData: const FlDotData(show: false),
+                  belowBarData: BarAreaData(
+                    show: true,
+                    color: color.withOpacity(0.1),
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDualChart(
-    String title,
-    List<dynamic> data1,
-    List<dynamic> data2,
-    Color color1,
-    Color color2,
-    String unit,
-  ) {
-    if (data1.isEmpty && data2.isEmpty) {
-      return SizedBox(
-        height: 150,
-        child: Center(
-          child: Text(
-            'Collecting data...',
-            style: TextStyle(color: Colors.grey[500]),
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Row(
-              children: [
-                _buildLegendItem('CH1', color1),
-                const SizedBox(width: 16),
-                _buildLegendItem('CH2', color2),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 150,
-          child: LineChart(
-            LineChartData(
-              gridData: FlGridData(show: true),
-              titlesData: FlTitlesData(
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 40,
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                rightTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                topTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-              ),
-              borderData: FlBorderData(show: true),
-              lineBarsData: [
-                if (data1.isNotEmpty)
-                  LineChartBarData(
-                    spots: data1
-                        .asMap()
-                        .entries
-                        .map((e) => FlSpot(
-                              e.key.toDouble(),
-                              e.value.value,
-                            ))
-                        .toList(),
-                    isCurved: true,
-                    color: color1,
-                    barWidth: 2,
-                    dotData: FlDotData(show: false),
-                  ),
-                if (data2.isNotEmpty)
-                  LineChartBarData(
-                    spots: data2
-                        .asMap()
-                        .entries
-                        .map((e) => FlSpot(
-                              e.key.toDouble(),
-                              e.value.value,
-                            ))
-                        .toList(),
-                    isCurved: true,
-                    color: color2,
-                    barWidth: 2,
-                    dotData: FlDotData(show: false),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(String label, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
         ),
       ],
     );

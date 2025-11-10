@@ -19,13 +19,11 @@ class DeviceProvider extends ChangeNotifier {
   List<DeviceInfo> _allDevices = [];
   Statistics? _statistics;
   
-  // Chart data
+  // Chart data - single channel only
   final List<ChartDataPoint> _voltageData = [];
-  final List<ChartDataPoint> _ch1CurrentData = [];
-  final List<ChartDataPoint> _ch2CurrentData = [];
-  final List<ChartDataPoint> _ch1PowerData = [];
-  final List<ChartDataPoint> _ch2PowerData = [];
-  final List<ChartDataPoint> _totalPowerData = [];
+  final List<ChartDataPoint> _currentData = [];
+  final List<ChartDataPoint> _powerData = [];
+  final List<ChartDataPoint> _energyData = [];
   
   // State
   bool _isLoading = false;
@@ -43,11 +41,9 @@ class DeviceProvider extends ChangeNotifier {
   bool get isConnected => _webSocketService.isConnected;
 
   List<ChartDataPoint> get voltageData => _voltageData;
-  List<ChartDataPoint> get ch1CurrentData => _ch1CurrentData;
-  List<ChartDataPoint> get ch2CurrentData => _ch2CurrentData;
-  List<ChartDataPoint> get ch1PowerData => _ch1PowerData;
-  List<ChartDataPoint> get ch2PowerData => _ch2PowerData;
-  List<ChartDataPoint> get totalPowerData => _totalPowerData;
+  List<ChartDataPoint> get currentData => _currentData;
+  List<ChartDataPoint> get powerData => _powerData;
+  List<ChartDataPoint> get energyData => _energyData;
 
   void updateServices(WebSocketService ws, ApiService api) {
     _webSocketService.removeListener(_onWebSocketUpdate);
@@ -75,22 +71,18 @@ class DeviceProvider extends ChangeNotifier {
   void _addToChartData(DeviceData data) {
     final now = data.timestamp;
     
-    // Add new data points
+    // Add new data points for single channel
     _voltageData.add(ChartDataPoint(now, data.voltage));
-    _ch1CurrentData.add(ChartDataPoint(now, data.channel1.current));
-    _ch2CurrentData.add(ChartDataPoint(now, data.channel2.current));
-    _ch1PowerData.add(ChartDataPoint(now, data.channel1.power));
-    _ch2PowerData.add(ChartDataPoint(now, data.channel2.power));
-    _totalPowerData.add(ChartDataPoint(now, data.totalPower));
+    _currentData.add(ChartDataPoint(now, data.current));
+    _powerData.add(ChartDataPoint(now, data.power));
+    _energyData.add(ChartDataPoint(now, data.energy));
     
     // Keep only max data points
     if (_voltageData.length > AppConstants.maxDataPoints) {
       _voltageData.removeAt(0);
-      _ch1CurrentData.removeAt(0);
-      _ch2CurrentData.removeAt(0);
-      _ch1PowerData.removeAt(0);
-      _ch2PowerData.removeAt(0);
-      _totalPowerData.removeAt(0);
+      _currentData.removeAt(0);
+      _powerData.removeAt(0);
+      _energyData.removeAt(0);
     }
   }
 
@@ -168,41 +160,18 @@ class DeviceProvider extends ChangeNotifier {
     }
   }
 
-  // Control relay
-  Future<bool> controlRelay(int channel, bool turnOn) async {
+  // Control SSR (VaultGaurd has single SSR, no channel parameter)
+  Future<bool> controlSSR(bool turnOn) async {
     if (_selectedDeviceId == null) return false;
 
     try {
-      final success = await _apiService.controlRelay(
+      final success = await _apiService.controlSSR(
         _selectedDeviceId!,
         turnOn,
-        channel: channel,
       );
       
       if (success) {
         // Refresh device data
-        await refreshDevice();
-      }
-      
-      return success;
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-      return false;
-    }
-  }
-
-  // Control all relays
-  Future<bool> controlAllRelays(bool turnOn) async {
-    if (_selectedDeviceId == null) return false;
-
-    try {
-      final success = await _apiService.controlRelay(
-        _selectedDeviceId!,
-        turnOn,
-      );
-      
-      if (success) {
         await refreshDevice();
       }
       
@@ -279,11 +248,9 @@ class DeviceProvider extends ChangeNotifier {
     _statistics = null;
     _selectedDeviceId = null;
     _voltageData.clear();
-    _ch1CurrentData.clear();
-    _ch2CurrentData.clear();
-    _ch1PowerData.clear();
-    _ch2PowerData.clear();
-    _totalPowerData.clear();
+    _currentData.clear();
+    _powerData.clear();
+    _energyData.clear();
     _error = null;
     notifyListeners();
   }
