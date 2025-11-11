@@ -241,48 +241,48 @@ class _ControlsTabState extends State<ControlsTab> {
                         ),
                       ],
                     ),
-                    ...[
-                    const SizedBox(height: 16),
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: getSSRStatusColor(data.ssrState).withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: getSSRStatusColor(data.ssrState),
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: getSSRStatusColor(data.ssrState).withOpacity(0.3),
-                              blurRadius: 12,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              data.ssrState ? Icons.power_settings_new : Icons.power_off,
+                    if (data != null) ...[
+                      const SizedBox(height: 16),
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: getSSRStatusColor(data.ssrState).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
                               color: getSSRStatusColor(data.ssrState),
-                              size: 24,
+                              width: 2,
                             ),
-                            const SizedBox(width: 10),
-                            Text(
-                              'SSR is ${getSSRStatusText(data.ssrState)}',
-                              style: TextStyle(
-                                color: getSSRStatusColor(data.ssrState),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                            boxShadow: [
+                              BoxShadow(
+                                color: getSSRStatusColor(data.ssrState).withOpacity(0.3),
+                                blurRadius: 12,
+                                spreadRadius: 2,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                data.ssrState ? Icons.power_settings_new : Icons.power_off,
+                                color: getSSRStatusColor(data.ssrState),
+                                size: 24,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'SSR is ${getSSRStatusText(data.ssrState)}',
+                                style: TextStyle(
+                                  color: getSSRStatusColor(data.ssrState),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
                   ],
                 ),
               ),

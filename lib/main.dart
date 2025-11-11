@@ -89,8 +89,8 @@ class VaultGaurdApp extends StatelessWidget {
             iconTheme: IconThemeData(color: AppColors.textPrimary),
           ),
           
-          // Card Theme
-          cardTheme: CardTheme(
+          // Card Theme - FIXED: Use CardThemeData
+          cardTheme: CardThemeData(
             elevation: 4,
             color: AppColors.surface,
             shape: RoundedRectangleBorder(
@@ -166,8 +166,8 @@ class VaultGaurdApp extends StatelessWidget {
             ),
           ),
           
-          // Dialog Theme
-          dialogTheme: DialogTheme(
+          // Dialog Theme - FIXED: Use DialogThemeData
+          dialogTheme: DialogThemeData(
             backgroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
@@ -192,8 +192,8 @@ class VaultGaurdApp extends StatelessWidget {
             behavior: SnackBarBehavior.floating,
           ),
           
-          // Tab Bar Theme
-          tabBarTheme: const TabBarTheme(
+          // Tab Bar Theme - FIXED: Use TabBarThemeData
+          tabBarTheme: const TabBarThemeData(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textTertiary,
             indicatorColor: AppColors.primary,

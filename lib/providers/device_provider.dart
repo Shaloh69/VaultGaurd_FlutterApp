@@ -19,9 +19,9 @@ class DeviceProvider extends ChangeNotifier {
   List<DeviceInfo> _allDevices = [];
   Statistics? _statistics;
   
-  // Chart data - single channel only
+  // Chart data - single channel only (renamed to avoid conflict)
   final List<ChartDataPoint> _voltageData = [];
-  final List<ChartDataPoint> _currentData = [];
+  final List<ChartDataPoint> _currentChartData = [];
   final List<ChartDataPoint> _powerData = [];
   final List<ChartDataPoint> _energyData = [];
   
@@ -41,7 +41,7 @@ class DeviceProvider extends ChangeNotifier {
   bool get isConnected => _webSocketService.isConnected;
 
   List<ChartDataPoint> get voltageData => _voltageData;
-  List<ChartDataPoint> get currentData => _currentData;
+  List<ChartDataPoint> get currentChartData => _currentChartData;
   List<ChartDataPoint> get powerData => _powerData;
   List<ChartDataPoint> get energyData => _energyData;
 
@@ -73,14 +73,14 @@ class DeviceProvider extends ChangeNotifier {
     
     // Add new data points for single channel
     _voltageData.add(ChartDataPoint(now, data.voltage));
-    _currentData.add(ChartDataPoint(now, data.current));
+    _currentChartData.add(ChartDataPoint(now, data.current));
     _powerData.add(ChartDataPoint(now, data.power));
     _energyData.add(ChartDataPoint(now, data.energy));
     
     // Keep only max data points
     if (_voltageData.length > AppConstants.maxDataPoints) {
       _voltageData.removeAt(0);
-      _currentData.removeAt(0);
+      _currentChartData.removeAt(0);
       _powerData.removeAt(0);
       _energyData.removeAt(0);
     }
@@ -248,7 +248,7 @@ class DeviceProvider extends ChangeNotifier {
     _statistics = null;
     _selectedDeviceId = null;
     _voltageData.clear();
-    _currentData.clear();
+    _currentChartData.clear();
     _powerData.clear();
     _energyData.clear();
     _error = null;

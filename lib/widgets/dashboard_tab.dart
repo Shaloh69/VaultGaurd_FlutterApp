@@ -19,6 +19,31 @@ class _DashboardTabState extends State<DashboardTab> {
       builder: (context, deviceProvider, child) {
         final data = deviceProvider.currentData;
 
+        // Handle null data
+        if (data == null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Waiting for device data...',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: deviceProvider.refreshDevice,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Refresh'),
+                ),
+              ],
+            ),
+          );
+        }
+
         return RefreshIndicator(
           onRefresh: deviceProvider.refreshDevice,
           color: AppColors.primary,
@@ -354,7 +379,7 @@ class _DashboardTabState extends State<DashboardTab> {
             
             _buildChart(
               'Current',
-              deviceProvider.currentData,
+              deviceProvider.currentChartData,
               AppColors.currentColor,
               'A',
             ),

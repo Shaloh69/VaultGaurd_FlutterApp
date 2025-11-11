@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import '../models/device_models.dart';
 import '../utils/constants.dart';
 
+/// ChannelCard widget for displaying single-channel power monitoring data
+/// Note: VaultGaurd is a single-channel device, so this displays the main channel data
 class ChannelCard extends StatelessWidget {
   final int channelNumber;
-  final ChannelData channelData;
+  final DeviceData deviceData;
   final Color color;
 
   const ChannelCard({
     super.key,
     required this.channelNumber,
-    required this.channelData,
+    required this.deviceData,
     required this.color,
   });
 
@@ -52,16 +54,16 @@ class ChannelCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: getRelayStatusColor(channelData.relayState).withOpacity(0.1),
+                    color: getSSRStatusColor(deviceData.ssrState).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: getRelayStatusColor(channelData.relayState),
+                      color: getSSRStatusColor(deviceData.ssrState),
                     ),
                   ),
                   child: Text(
-                    getRelayStatusText(channelData.relayState),
+                    getSSRStatusText(deviceData.ssrState),
                     style: TextStyle(
-                      color: getRelayStatusColor(channelData.relayState),
+                      color: getSSRStatusColor(deviceData.ssrState),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -75,7 +77,7 @@ class ChannelCard extends StatelessWidget {
                   child: _buildMetric(
                     context,
                     'Current',
-                    formatNumber(channelData.current, decimals: 3),
+                    formatNumber(deviceData.current, decimals: 3),
                     AppStrings.unitCurrent,
                     AppColors.currentColor,
                   ),
@@ -84,7 +86,7 @@ class ChannelCard extends StatelessWidget {
                   child: _buildMetric(
                     context,
                     'Power',
-                    formatNumber(channelData.power, decimals: 1),
+                    formatNumber(deviceData.power, decimals: 1),
                     AppStrings.unitPower,
                     AppColors.powerColor,
                   ),
@@ -98,7 +100,7 @@ class ChannelCard extends StatelessWidget {
                   child: _buildMetric(
                     context,
                     'Energy',
-                    formatNumber(channelData.energy, decimals: 3),
+                    formatNumber(deviceData.energy, decimals: 3),
                     AppStrings.unitEnergy,
                     AppColors.energyColor,
                   ),
@@ -107,7 +109,7 @@ class ChannelCard extends StatelessWidget {
                   child: _buildMetric(
                     context,
                     'Cost',
-                    formatNumber(channelData.cost, decimals: 2),
+                    formatNumber(deviceData.cost, decimals: 2),
                     AppStrings.unitCost,
                     AppColors.info,
                   ),
